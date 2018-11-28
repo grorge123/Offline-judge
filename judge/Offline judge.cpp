@@ -9,10 +9,12 @@
 using namespace std;
 using namespace std::chrono;
 bool checkinp(string inp,int SZ){
-    if(inp.size()!=SZ)return false;
+    if(inp.size()!=SZ){cout <<"輸出錯誤"<<endl;return false;}
     for(int i=0;i<inp.size();i++){
-        if(inp[i]<'0'||inp[i]>'9')
+        if(inp[i]<'0'||inp[i]>'9'){
+            cout << "輸出錯誤"<<endl;
             return false;
+        }
     }
     return true;
 }
@@ -39,11 +41,11 @@ int compile(string inp,string ans,string pro,int tim){
     }
     if(!fans){
         cout << "輸入答案檔名錯誤!"<<endl;
-        return 0;
+        return 5;
     }
     if(!fpro){
         cout <<"題目找不到"<<endl;
-        return 0;
+        return 5;
     }
     string cmd = "g++ -g -O2 -std=gnu++11 -o ./out/"+inp+".exe"+" ./inp/"+inp+".cpp";
     cout << cmd<<endl;
@@ -52,7 +54,8 @@ int compile(string inp,string ans,string pro,int tim){
     }
     cmd="g++ -g -O2 -std=gnu++11 -o ./ansout/" + ans + ".exe" + " ./ans/" + ans + ".cpp";
     if(system(cmd.c_str())){
-        return 0;
+        cout << "答案編輯錯誤!"<<endl;
+        return 5;
     }
     auto startTime = steady_clock::now();
     string cmdS = "ansout\\" + ans + ".exe < " + "pro\\" + pro + ".txt > " + "judge\\" + ans + ".txt";
@@ -112,8 +115,8 @@ void rm(string inp,string ans){
     system(cmd.c_str());
     cmd = "del ansout\\" + ans + ".exe";
     system(cmd.c_str());
-//    string cmd = "del inp\\" + inp + ".cpp";
-//    system(cmd.c_str());
+    cmd = "del inp\\" + inp + ".cpp";
+    system(cmd.c_str());
 }
 int main(){
     string inp,ans,pro,out,type;
@@ -138,11 +141,10 @@ int main(){
             cin >> inp>>ans>> pro>>tim;
         }
         do{
-            if(type=="2")inp=tryhavefile(name);
+            if(type=="1")inp=tryhavefile(name);
             int result=compile(inp,ans,pro,tim);
             if(result==1){
                 result=judge(inp,ans,pro);
-                rm(inp,ans);
             }
             switch(result){
             case 0:
@@ -165,8 +167,18 @@ int main(){
                 out="RE!!Maybe some bug in your code but it con be compile";
                 cout << "RE!!Maybe some bug in your code but it con be compile"<<endl;
                 break;
+            case 5:
+                out="SE!! System have some error!";
+                cout << "SE!! System have some error!"<<endl;
+                return 0;
             }
-        }while(type=="2");
+            fstream file;
+            file.open("./result/"+inp+".txt",ios::app);
+            time_t now = time(0);
+            file<<ctime(&now)<<out<<' '<<pro<<'\n';
+            file.clear();
+            rm(inp,ans);
+        }while(type=="1");
     }
     return 0;
 }
