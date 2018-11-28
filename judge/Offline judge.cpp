@@ -8,6 +8,26 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
+bool checkinp(string inp,int SZ){
+    if(inp.size()!=SZ)return false;
+    for(int i=0;i<inp.size();i++){
+        if(inp[i]<'0'||inp[i]>'9')
+            return false;
+    }
+    return true;
+}
+string tryhavefile(vector<string> name){
+    while(true){
+        for(int i=0;i<name.size();i++){
+            fstream finp;
+            finp.open("./inp/"+name[i]+".cpp",ios::in);
+            if(finp){
+                return name[i];
+            }
+        }
+    }
+    return 0;
+}
 int compile(string inp,string ans,string pro,int tim){
     fstream finp,fans,fpro;
     fans.open("./ans/"+ans+".cpp",ios::in);
@@ -36,7 +56,7 @@ int compile(string inp,string ans,string pro,int tim){
     }
     auto startTime = steady_clock::now();
     string cmdS = "ansout\\" + ans + ".exe < " + "pro\\" + pro + ".txt > " + "judge\\" + ans + ".txt";
-    cout << cmdS<<endl;
+//    cout << cmdS<<endl;
     system(cmdS.c_str());
     //cout << "correct answer cost " << (steady_clock::now() - startTime).count() << " at test" << i << endl;
     auto timeout =  (steady_clock::now() - startTime) * 15;
@@ -96,33 +116,57 @@ void rm(string inp,string ans){
 //    system(cmd.c_str());
 }
 int main(){
-    string inp,ans,pro;
+    string inp,ans,pro,out,type;
     int tim;
+    vector<string> name;
     while(true){
-        cout << "請輸入程式檔名,答案檔名,問題資料夾,時間";
-        cin >> inp>>ans>> pro>>tim;
-        int result=compile(inp,ans,pro,tim);
-        if(result==1){
-            result=judge(inp,ans,pro);
-            rm(inp,ans);
+        do{
+            cout << "請選擇模式:(1)單一檔案測試 (2)多筆檔案測試";
+            cin >> type;
+        }while(!checkinp(type,1));
+        if(type=="1"){
+            int SZ;
+            cout << "請輸入數量,答案檔名,問題資料夾,時間";
+            cin >>SZ>>ans>>pro>>tim;
+            for(int i=0;i<SZ;i++){
+                string tmp;
+                cin >> tmp;
+                name.push_back(tmp);
+            }
+        }else{
+            cout << "請輸入程式檔名,答案檔名,問題資料夾,時間";
+            cin >> inp>>ans>> pro>>tim;
         }
-        switch(result){
-        case 0:
-            cout << "Oh! CE! Maybe you need to see your code again"<<endl;
-            break;
-        case 1:
-            cout << "Wow!That is AC!!!You are so smart!"<<endl;
-            break;
-        case 2:
-            cout << "TLE! Your program run time is to more"<<endl;
-            break;
-        case 3:
-            cout << "WA!!Your program runs result is not same as anser!!!(Be careful!!!Otherwise you will see me again) *\(O_O)/*"<<endl;
-            break;
-        case 4:
-            cout << "RE!!Maybe some bug in your code but it con be compile"<<endl;
-            break;
-        }
+        do{
+            if(type=="2")inp=tryhavefile(name);
+            int result=compile(inp,ans,pro,tim);
+            if(result==1){
+                result=judge(inp,ans,pro);
+                rm(inp,ans);
+            }
+            switch(result){
+            case 0:
+                out="Oh! CE! Maybe you need to see your code again";
+                cout << "Oh! CE! Maybe you need to see your code again"<<endl;
+                break;
+            case 1:
+                out="Wow!That is AC!!!You are so smart!";
+                cout << "Wow!That is AC!!!You are so smart!"<<endl;
+                break;
+            case 2:
+                out="TLE! Your program run time is to more";
+                cout << "TLE! Your program run time is to more"<<endl;
+                break;
+            case 3:
+                out="WA!!Your program runs result is not same as anser!!!(Be careful!!!Otherwise you will see me again) *\(O_O)/*";
+                cout << "WA!!Your program runs result is not same as anser!!!(Be careful!!!Otherwise you will see me again) *\(O_O)/*"<<endl;
+                break;
+            case 4:
+                out="RE!!Maybe some bug in your code but it con be compile";
+                cout << "RE!!Maybe some bug in your code but it con be compile"<<endl;
+                break;
+            }
+        }while(type=="2");
     }
     return 0;
 }
