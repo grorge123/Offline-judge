@@ -106,7 +106,7 @@ int judge(string inp,string ans, string pro){
     }
     return 1;
 }
-void rm(string inp,string ans){
+void rm(string inp,string ans,string out){
     string cmd = "del judge\\" + inp + ".txt";
     system(cmd.c_str());
     cmd = "del judge\\" + ans + ".txt";
@@ -117,6 +117,11 @@ void rm(string inp,string ans){
     system(cmd.c_str());
     cmd = "del inp\\" + inp + ".cpp";
     system(cmd.c_str());
+    fstream file;
+    file.open("./result/"+inp+".txt",ios::app);
+    time_t now = time(0);
+    file<<ctime(&now)<<out<<' '<<pro<<'\n';
+    file.clear();
 }
 int main(){
     string inp,ans,pro,out,type;
@@ -172,12 +177,7 @@ int main(){
                 cout << "SE!! System have some error!"<<endl;
                 return 0;
             }
-            fstream file;
-            file.open("./result/"+inp+".txt",ios::app);
-            time_t now = time(0);
-            file<<ctime(&now)<<out<<' '<<pro<<'\n';
-            file.clear();
-            rm(inp,ans);
+            rm(inp,ans,out);
         }while(type=="1");
     }
     return 0;
